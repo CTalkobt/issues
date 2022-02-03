@@ -10,16 +10,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TestStartup implements ApplicationListener<ApplicationReadyEvent> {
+    private final boolean useSolution = true;
+    
     @Autowired
     private ProducerTemplate producerTemplate;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
 
-        for (int i = 1; i < 20000; i++) {
+        for (int i = 1; i <= 20000; i++) {
             User u = new User("id"+i, "first"+i, "last"+i);
-LogManager.getLogger().info("Writing : " + u);
-            producerTemplate.sendBody("seda://incoming&defaultBlockWhenFull=true&defaultDiscardWhenFull=false&defaultOfferTimeout=-1",  u);
+            if (useSolution) {
+                producerTemplate.sendBody("seda://incoming?blockWhenFull=true&offerTimeout=500000",  u);                
+            } else {
+                producerTemplate.sendBody("seda://incoming",  u); /* Problem statement */
+            }
         }
     }
 
